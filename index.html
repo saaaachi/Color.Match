@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Color Match - 第38弾</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #eceff1; font-family: sans-serif; touch-action: none; }
+        #ad-top, #ad-bottom { position: fixed; left: 0; width: 100%; height: 150px; background: #333; z-index: 100; display: flex; align-items: center; justify-content: center; }
+        #ad-top { top: 0; } #ad-bottom { bottom: 0; }
+        iframe { border: none; width: 100%; height: 150px; }
+        
+        #main-container { margin-top: 150px; height: calc(100vh - 300px); position: relative; display: flex; flex-direction: column; align-items: center; justify-content: space-around; }
+        
+        #ui-layer { width: 100%; display: flex; justify-content: space-around; padding: 10px 0; }
+        .ui-box { padding: 5px 15px; border-radius: 15px; font-weight: bold; font-size: 18px; color: #455a64; background: white; box-shadow: 0 2px #b0bec5; }
+
+        #question-area { text-align: center; }
+        #word-display { font-size: 50px; font-weight: bold; margin-bottom: 10px; }
+        #color-box { width: 120px; height: 120px; border-radius: 20px; margin: 0 auto; border: 4px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+
+        #choice-buttons { display: flex; gap: 30px; padding: 20px; }
+        .ans-btn { 
+            width: 100px; height: 100px; border-radius: 50%; border: none; 
+            font-size: 24px; font-weight: bold; color: white; cursor: pointer; 
+            box-shadow: 0 6px rgba(0,0,0,0.2); transition: transform 0.1s;
+        }
+        #btn-yes { background: #4caf50; }
+        #btn-no { background: #f44336; }
+        .ans-btn:active { transform: translateY(4px); box-shadow: none; }
+
+        #end-menu { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(255,255,255,0.95); display: none; flex-direction: column; 
+            align-items: center; justify-content: center; z-index: 100; 
+        }
+        .menu-btn { width: 220px; padding: 15px; margin: 10px; font-size: 20px; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; }
+    </style>
+</head>
+<body>
+    <div id="ad-top"><iframe id="frame-top" src="ad.html"></iframe></div>
+    <div id="ad-bottom"><iframe id="frame-bottom" src="ad.html"></iframe></div>
+    
+    <div id="main-container">
+        <div id="ui-layer">
+            <div id="score-display" class="ui-box">SCORE: 0</div>
+            <div id="timer-display" class="ui-box">TIME: 3.0</div>
+        </div>
+        
+        <div style="font-weight:bold; color:#455a64;">文字と色は一致してる？</div>
+
+        <div id="question-area">
+            <div id="word-display">あか</div>
+            <div id="color-box"></div>
+        </div>
+
+        <div id="choice-buttons">
+            <button id="btn-no" class="ans-btn" onclick="check(false)">✕</button>
+            <button id="btn-yes" class="ans-btn" onclick="check(true)">◯</button>
+        </div>
+
+        <div id="end-menu">
+            <h2 id="result-msg" style="color:#455a64; text-align:center;">Color Match</h2>
+            <button class="menu-btn" style="background:#455a64; color:white;" onclick="startNewGame()">もう一度遊ぶ</button>
+            <a href="https://saaaachi.github.io/Shadow-Shapes/" class="menu-btn" style="background:#ff4081; color:white;">他のゲームはこちら</a>
+        </div>
+    </div>
+
+    <script>
+        let score = 0, gameActive = false, timeLeft = 3.0, timer;
+        const colorData = [
+            { name: "あか", code: "#f44336" },
+            { name: "あお", code: "#2196f3" },
+            { name: "みどり", code: "#4caf50" },
+            { name: "きいろ", code: "#ffeb3b" },
+            { name: "くろ", code: "#212121" }
+        ];
+        let isCorrectMatch = false;
+
+        function startNewGame() {
+            document.getElementById("end-menu").style.display = "none";
+            score = 0; gameActive = true;
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            if(!gameActive) return;
+            // スコアが上がると極限まで短くなる（最低0.8秒）
+            timeLeft = Math.max(0.8, 3.0 - (score * 0.1));
+            updateUI();
+
+            const wordObj = colorData[Math.floor(Math.random() * colorData.length)];
+            isCorrectMatch = Math.random() > 0.5;
+            
+            let colorObj;
+            if(isCorrectMatch) {
+                colorObj = wordObj;
+            } else {
+                do {
+                    colorObj = colorData[Math.floor(Math.random() * colorData.length)];
+                } while(colorObj === wordObj);
+            }
+
+            const wordEl = document.getElementById("word-display");
+            wordEl.innerText = wordObj.name;
+            // 文字の色自体もランダムに変えて混乱を誘う
+            wordEl.style.color = colorData[Math.floor(Math.random() * colorData.length)].code;
+            
+            document.getElementById("color-box").style.backgroundColor = colorObj.code;
+
+            clearInterval(timer);
+            timer = setInterval(() => {
+                timeLeft -= 0.1;
+                updateUI();
+                if(timeLeft <= 0) gameOver("時間切れ！⏳");
+            }, 100);
+        }
+
+        function check(userAns) {
+            if(!gameActive) return;
+            if(userAns === isCorrectMatch) {
+                score++;
+                nextQuestion();
+            } else {
+                gameOver("まちがい！😱");
+            }
+        }
+
+        function updateUI() {
+            document.getElementById("score-display").innerText = "SCORE: " + score;
+            document.getElementById("timer-display").innerText = "TIME: " + Math.max(0, timeLeft).toFixed(1);
+        }
+
+        function gameOver(msg) {
+            gameActive = false;
+            clearInterval(timer);
+            document.getElementById("result-msg").innerText = msg + "\nSCORE: " + score;
+            document.getElementById("end-menu").style.display = "flex";
+        }
+
+        function refreshAds() {
+            document.getElementById('frame-top').src += "";
+            document.getElementById('frame-bottom').src += "";
+        }
+        setInterval(refreshAds, 30000);
+
+        window.onload = () => { document.getElementById("end-menu").style.display = "flex"; };
+    </script>
+</body>
+</html>
