@@ -10,24 +10,28 @@
         #ad-top { top: 0; } #ad-bottom { bottom: 0; }
         iframe { border: none; width: 100%; height: 150px; }
         
-        #main-container { margin-top: 150px; height: calc(100vh - 300px); position: relative; display: flex; flex-direction: column; align-items: center; justify-content: space-around; }
+        /* コンテナの配置を調整 */
+        #main-container { margin-top: 150px; height: calc(100vh - 300px); position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
         
-        #ui-layer { width: 100%; display: flex; justify-content: space-around; padding: 10px 0; }
-        .ui-box { padding: 5px 15px; border-radius: 15px; font-weight: bold; font-size: 18px; color: #455a64; background: white; box-shadow: 0 2px #b0bec5; }
+        #ui-layer { width: 100%; display: flex; justify-content: space-around; padding: 5px 0; }
+        .ui-box { padding: 4px 12px; border-radius: 12px; font-weight: bold; font-size: 16px; color: #455a64; background: white; box-shadow: 0 2px #b0bec5; }
 
-        #question-area { text-align: center; }
-        #word-display { font-size: 50px; font-weight: bold; margin-bottom: 10px; }
-        #color-box { width: 120px; height: 120px; border-radius: 20px; margin: 0 auto; border: 4px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        /* 問題エリアを少しコンパクトに */
+        #question-area { text-align: center; margin-top: 5px; }
+        #word-display { font-size: 42px; font-weight: bold; margin-bottom: 5px; }
+        #color-box { width: 100px; height: 100px; border-radius: 20px; margin: 0 auto; border: 4px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
 
-        #choice-buttons { display: flex; gap: 30px; padding: 20px; }
+        /* ボタンの位置を上に引き上げ */
+        #choice-buttons { display: flex; gap: 40px; padding: 15px; margin-top: 10px; }
         .ans-btn { 
-            width: 100px; height: 100px; border-radius: 50%; border: none; 
-            font-size: 24px; font-weight: bold; color: white; cursor: pointer; 
+            width: 85px; height: 85px; border-radius: 50%; border: none; 
+            font-size: 32px; font-weight: bold; color: white; cursor: pointer; 
             box-shadow: 0 6px rgba(0,0,0,0.2); transition: transform 0.1s;
+            display: flex; align-items: center; justify-content: center;
         }
         #btn-yes { background: #4caf50; }
         #btn-no { background: #f44336; }
-        .ans-btn:active { transform: translateY(4px); box-shadow: none; }
+        .ans-btn:active { transform: translateY(3px); box-shadow: none; }
 
         #end-menu { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
@@ -47,7 +51,7 @@
             <div id="timer-display" class="ui-box">TIME: 3.0</div>
         </div>
         
-        <div style="font-weight:bold; color:#455a64;">文字と色は一致してる？</div>
+        <div style="font-weight:bold; color:#455a64; font-size: 14px; margin-top: 5px;">「文字の意味」と「色」は同じ？</div>
 
         <div id="question-area">
             <div id="word-display">あか</div>
@@ -62,7 +66,7 @@
         <div id="end-menu">
             <h2 id="result-msg" style="color:#455a64; text-align:center;">Color Match</h2>
             <button class="menu-btn" style="background:#455a64; color:white;" onclick="startNewGame()">もう一度遊ぶ</button>
-            <a href="https://saaaachi.github.io/Shadow-Shapes/" class="menu-btn" style="background:#ff4081; color:white;">他のゲームはこちら</a>
+            <a href="https://saaaachi.github.io/Color.Match/" class="menu-btn" style="background:#ff4081; color:white;">他のゲームはこちら</a>
         </div>
     </div>
 
@@ -85,8 +89,7 @@
 
         function nextQuestion() {
             if(!gameActive) return;
-            // スコアが上がると極限まで短くなる（最低0.8秒）
-            timeLeft = Math.max(0.8, 3.0 - (score * 0.1));
+            timeLeft = Math.max(0.7, 3.0 - (score * 0.12));
             updateUI();
 
             const wordObj = colorData[Math.floor(Math.random() * colorData.length)];
@@ -103,9 +106,7 @@
 
             const wordEl = document.getElementById("word-display");
             wordEl.innerText = wordObj.name;
-            // 文字の色自体もランダムに変えて混乱を誘う
             wordEl.style.color = colorData[Math.floor(Math.random() * colorData.length)].code;
-            
             document.getElementById("color-box").style.backgroundColor = colorObj.code;
 
             clearInterval(timer);
@@ -139,11 +140,11 @@
         }
 
         function refreshAds() {
-            document.getElementById('frame-top').src += "";
-            document.getElementById('frame-bottom').src += "";
+            const t = document.getElementById('frame-top');
+            const b = document.getElementById('frame-bottom');
+            t.src = t.src; b.src = b.src;
         }
         setInterval(refreshAds, 30000);
-
         window.onload = () => { document.getElementById("end-menu").style.display = "flex"; };
     </script>
 </body>
