@@ -2,207 +2,72 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Color Match - v26.8</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>【遊び方】Color Match - 脳トレ・カラーマッチング</title>
     <style>
-        * { box-sizing: border-box; }
-        html, body { margin: 0; padding: 0; overflow: hidden; width: 100%; height: 100%; position: fixed; touch-action: none; }
-        body { background: #eceff1; font-family: sans-serif; display: flex; flex-direction: column; }
+        body { font-family: sans-serif; line-height: 1.6; background-color: #eceff1; margin: 0; padding: 15px; color: #455a64; }
+        .info-container { max-width: 600px; margin: 0 auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .back-link { text-decoration: none; color: #607d8b; font-size: 0.9rem; margin-bottom: 20px; display: inline-block; }
+        h1 { color: #455a64; font-size: 1.5rem; text-align: center; margin-top: 0; }
+        .game-img { width: 100%; border-radius: 12px; margin: 20px 0; border: 1px solid #cfd8dc; }
+        .description-box h3 { color: #4caf50; border-left: 4px solid #4caf50; padding-left: 10px; margin-top: 25px; }
         
-        /* 上下広告：100px */
-        #ad-top, #ad-bottom { width: 100%; height: 100px; background: #333; display: flex; align-items: center; justify-content: center; flex-shrink: 0; z-index: 100; position: relative; }
-        iframe { border: none; width: 100%; height: 100%; background: #333; }
+        /* プレイボタン */
+        .play-btn { display: block; width: 220px; margin: 30px auto 15px; text-align: center; padding: 18px; background: #4caf50; color: white; text-decoration: none; border-radius: 50px; font-weight: bold; box-shadow: 0 4px #388e3c; font-size: 1.1rem; }
+        .play-btn:active { transform: translateY(2px); box-shadow: 0 2px #388e3c; }
 
-        /* ゲームエリア */
-        #game-outer { flex-grow: 1; position: relative; width: 100%; background: #eceff1; overflow: hidden; }
-        #main-container { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 15px 0; }
-        
-        #ui-layer { width: 100%; display: flex; justify-content: space-around; z-index: 10; }
-        .ui-box { padding: 6px 15px; border-radius: 12px; font-weight: bold; font-size: 16px; color: #455a64; background: white; box-shadow: 0 2px #b0bec5; }
+        /* ボタン下の小サイズ広告エリア */
+        .small-ad-area { width: 300px; height: 50px; background: rgba(0,0,0,0.03); margin: 20px auto; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px dashed #ccc; }
 
-        /* 問題エリア */
-        #question-area { text-align: center; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; }
-        #word-display { font-size: 56px; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
-        #color-box { width: 100px; height: 100px; border-radius: 25px; border: 5px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-
-        /* 操作ボタン */
-        #choice-buttons { display: flex; gap: 50px; padding-bottom: 20px; }
-        .ans-btn { 
-            width: 90px; height: 90px; border-radius: 50%; border: none; 
-            font-size: 36px; font-weight: bold; color: white; cursor: pointer; 
-            box-shadow: 0 6px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center;
-            transition: transform 0.1s;
-        }
-        #btn-yes { background: #4caf50; }
-        #btn-no { background: #f44336; }
-        .ans-btn:active { transform: translateY(4px); box-shadow: 0 2px rgba(0,0,0,0.2); }
-
-        /* メニュー画面 */
-        #menuScreen { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(255,255,255,0.97); display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; z-index: 50; color: #455a64;
-            padding: 20px 0;
-        }
-        #result-msg { margin: 10px 0; font-size: 26px; text-align: center; line-height: 1.4; }
-
-        /* 中央広告 */
-        #ad-middle-container { 
-            width: 320px; height: 100px; background: rgba(0,0,0,0.05); 
-            margin: 15px 0; display: none; justify-content: center; align-items: center; 
-            overflow: hidden; flex-shrink: 0; border: 1px solid #ccc; transition: opacity 0.3s;
-        }
-
-        .menu-btn-group { display: flex; flex-direction: column; align-items: center; width: 100%; gap: 12px; }
-        .menu-btn { width: 260px; padding: 15px; font-size: 18px; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; transition: 0.2s; }
-        #retry-btn { background: #455a64; color: white; box-shadow: 0 4px #263238; }
-        #retry-btn:disabled { background: #999; box-shadow: none; }
-        .link-btn { background: #ff4081; color: white; box-shadow: 0 4px #c2185b; }
-
-        /* 大広告用 */
-        #bigAdScreen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 3000; display: none; justify-content: center; align-items: center; }
-        .ad-frame-wrapper { width: 95%; height: 85%; position: relative; }
-        .ad-close-btn { position: absolute; top: -15px; right: -15px; color: white; font-size: 22px; font-weight: bold; cursor: pointer; background: rgba(0,0,0,0.8); width: 44px; height: 44px; border-radius: 50%; display: none; align-items: center; justify-content: center; z-index: 3100; border: 2px solid white; }
+        /* フッターリンク */
+        .footer-links { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #cfd8dc; font-size: 12px; }
+        .footer-links a { color: #78909c; text-decoration: none; margin: 0 10px; }
+        .footer-links a:hover { text-decoration: underline; }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body>
+<div class="info-container">
+    <a href="../index.html" class="back-link">← ゲーム一覧に戻る</a>
+    <h1>🎨 Color Match</h1>
 
-    <div id="ad-top"><iframe id="frame-top" src="ad.html?pos=top"></iframe></div>
-
-    <div id="game-outer">
-        <div id="main-container">
-            <div id="ui-layer">
-                <div id="score-display" class="ui-box">SCORE: 0</div>
-                <div id="timer-display" class="ui-box">TIME: 3.0</div>
-            </div>
-            
-            <div style="font-weight:bold; color:#455a64; font-size: 14px;">「文字の意味」と「箱の色」は同じ？</div>
-
-            <div id="question-area">
-                <div id="word-display">...</div>
-                <div id="color-box"></div>
-            </div>
-
-            <div id="choice-buttons">
-                <button id="btn-no" class="ans-btn" onclick="check(false)">✕</button>
-                <button id="btn-yes" class="ans-btn" onclick="check(true)">◯</button>
-            </div>
-        </div>
-
-        <div id="menuScreen">
-            <h2 id="result-msg">Color Match</h2>
-            <p style="font-size: 13px; color: #666;">混乱に負けずに正解を選ぼう！</p>
-            
-            <div id="ad-middle-container">
-                <div id="im-8b492cea6667490da71c488bdcc7cfc8">
-                    <script async src="https://imp-adedge.i-mobile.co.jp/script/v1/spot.js?20220104"></script>
-                    <script>(window.adsbyimobile=window.adsbyimobile||[]).push({pid:84561,mid:590804,asid:1924211,type:"banner",display:"inline",elementid:"im-8b492cea6667490da71c488bdcc7cfc8"})</script>
-                </div>
-            </div>
-
-            <div class="menu-btn-group">
-                <button id="retry-btn" class="menu-btn" onclick="startNewGame()">★ スタート ★</button>
-                <a href="https://saaaachi.github.io/" class="menu-btn link-btn">他のゲームへ</a>
-            </div>
-        </div>
-
-        <div id="bigAdScreen">
-            <div class="ad-frame-wrapper">
-                <div id="ad-close-btn" class="ad-close-btn" onclick="closeBigAd()"></div>
-                <iframe id="ad-large-frame" src="" style="width:100%; height:100%; border:none;"></iframe>
-            </div>
+    <div style="text-align: center;">
+        <p style="font-size: 10px; color: #999; margin-bottom: 5px;">スポンサーリンク</p>
+        <div id="im-857ade7f9e284af080ed831644ffde78">
+            <script async src="https://imp-adedge.i-mobile.co.jp/script/v1/spot.js?20220104"></script>
+            <script>(window.adsbyimobile=window.adsbyimobile||[]).push({pid:84561,mid:590804,asid:1924331,type:"banner",display:"inline",elementid:"im-857ade7f9e284af080ed831644ffde78"})</script>
         </div>
     </div>
 
-    <div id="ad-bottom"><iframe id="frame-bottom" src="ad.html?pos=bottom"></iframe></div>
+    <img src="images/color_match_thumb.jpeg" alt="Color Matchのスクショ" class="game-img">
 
-    <script>
-        let score = 0, gameActive = false, timeLeft = 3.0, timer, playCount = 0;
-        const colorData = [
-            { name: "あか", code: "#f44336" },
-            { name: "あお", code: "#2196f3" },
-            { name: "みどり", code: "#4caf50" },
-            { name: "きいろ", code: "#ffeb3b" },
-            { name: "くろ", code: "#212121" }
-        ];
-        let isCorrectMatch = false;
+    <div class="description-box">
+        <h3>💡 遊び方</h3>
+        <p>
+            表示される「文字の意味」と「箱の色」が一致しているかを素早く判断する脳トレゲームです！<br>
+            文字の色に惑わされず、正解なら「◯」、不正解なら「✕」をタップしてください。
+        </p>
 
-        const menuScreen = document.getElementById("menuScreen"), adMid = document.getElementById("ad-middle-container"), resultMsg = document.getElementById("result-msg"), retryBtn = document.getElementById("retry-btn");
+        <h3>🏆 攻略のコツ</h3>
+        <p>
+            文字の色はダミーです！「文字が何と書いてあるか」と「下の四角形の色」の2点だけに集中するのがハイスコアの鍵です。
+        </p>
+    </div>
 
-        function startNewGame() {
-            menuScreen.style.display = "none"; adMid.style.display = "none";
-            score = 0; gameActive = true;
-            nextQuestion();
-        }
+    <a href="https://saaaachi.github.io/Color-Match/" class="play-btn">今すぐプレイ！</a>
 
-        function nextQuestion() {
-            if(!gameActive) return;
-            timeLeft = Math.max(0.7, 3.0 - (score * 0.1));
-            updateUI();
+    <div class="small-ad-area">
+        <div id="im-small-banner">
+            <script async src="https://imp-adedge.i-mobile.co.jp/script/v1/spot.js?20220104"></script>
+            <script>(window.adsbyimobile=window.adsbyimobile||[]).push({pid:84561,mid:590804,asid:1924211,type:"banner",display:"inline",elementid:"im-small-banner"})</script>
+        </div>
+    </div>
 
-            const wordObj = colorData[Math.floor(Math.random() * colorData.length)];
-            isCorrectMatch = Math.random() > 0.5;
-            
-            let colorObj;
-            if(isCorrectMatch) { colorObj = wordObj; } 
-            else {
-                do { colorObj = colorData[Math.floor(Math.random() * colorData.length)]; } while(colorObj === wordObj);
-            }
-
-            const wordEl = document.getElementById("word-display");
-            wordEl.innerText = wordObj.name;
-            wordEl.style.color = colorData[Math.floor(Math.random() * colorData.length)].code;
-            document.getElementById("color-box").style.backgroundColor = colorObj.code;
-
-            clearInterval(timer);
-            timer = setInterval(() => {
-                timeLeft -= 0.1;
-                updateUI();
-                if(timeLeft <= 0) gameOver("時間切れ！⏳");
-            }, 100);
-        }
-
-        function check(userAns) {
-            if(!gameActive) return;
-            if(userAns === isCorrectMatch) {
-                score++;
-                nextQuestion();
-            } else {
-                gameOver("まちがい！😱");
-            }
-        }
-
-        function updateUI() {
-            document.getElementById("score-display").innerText = "SCORE: " + score;
-            document.getElementById("timer-display").innerText = "TIME: " + Math.max(0, timeLeft).toFixed(1);
-        }
-
-        function gameOver(msg) {
-            gameActive = false; playCount++;
-            clearInterval(timer);
-            
-            retryBtn.innerText = "お待ちください..."; retryBtn.disabled = true;
-            adMid.style.display = "flex"; adMid.style.opacity = "0.4";
-            resultMsg.innerText = msg + "\nSCORE: " + score;
-            menuScreen.style.display = "flex";
-
-            setTimeout(() => { adMid.style.opacity = "1"; retryBtn.disabled = false; retryBtn.innerText = "もう一度遊ぶ"; }, 1500);
-            if (playCount % 2 === 0) { setTimeout(showBigAd, 500); }
-        }
-
-        function showBigAd() {
-            const screen = document.getElementById("bigAdScreen"), closeBtn = document.getElementById("ad-close-btn");
-            document.getElementById("ad-large-frame").src = "./ad.large.html?t=" + Date.now();
-            screen.style.display = "flex"; let countdown = 5; closeBtn.style.display = "flex"; closeBtn.innerText = countdown; closeBtn.style.pointerEvents = "none";
-            const timerInt = setInterval(() => { countdown--; closeBtn.innerText = countdown; if (countdown <= 0) { clearInterval(timerInt); closeBtn.innerText = "×"; closeBtn.style.pointerEvents = "auto"; } }, 1000);
-        }
-
-        function closeBigAd() { document.getElementById("bigAdScreen").style.display = "none"; document.getElementById("ad-large-frame").src = ""; }
-
-        setInterval(() => { const f = document.getElementById('frame-top'); if(f) f.src = "ad.html?pos=top&t=" + Date.now(); }, 30000);
-        setTimeout(() => { setInterval(() => { const f = document.getElementById('frame-bottom'); if(f) f.src = "ad.html?pos=bottom&t=" + Date.now(); }, 30000); }, 15000);
-
-        window.onload = () => { menuScreen.style.display = "flex"; };
-    </script>
+    <div class="footer-links">
+        <a href="../privacy.html">プライバシーポリシー</a>
+        <a href="../terms.html">利用規約</a>
+        <a href="../contact.html">お問い合わせ</a>
+        <p style="margin-top: 15px; color: #999;">&copy; 2026 Mini Games Collection</p>
+    </div>
+</div>
 </body>
 </html>
